@@ -1,7 +1,7 @@
 # Especificación Formal — Sistema de Préstamo de Libros
 
-> **Autor:** [Tu nombre]
-> **Fecha:** [Fecha del taller]
+> **Autor:** [Daner Alejandro Salazar Colorado, Jaime Andrés Cardona Díaz]
+> **Fecha:** [5-05-2026]
 > **Versión:** 1.0
 > **Brief de origen:** Correo de Diana Restrepo, Coordinadora de Biblioteca
 
@@ -11,7 +11,7 @@
 
 ## 1. Propósito del sistema
 
-[Describe en 3-5 líneas qué hace el sistema, en tus propias palabras. No copies el correo. Reformúlalo como técnico.]
+[Gestionar el prestado y la devolución de libros de la biblioteca, proporcionando un sistema con la capacidad de manejar el plazo, las multas, los limites de libros por estudiante, el historial, las renovaciones y las solicitudes de libros.]
 
 ---
 
@@ -19,11 +19,21 @@
 
 **Incluido en esta versión:**
 
-- [Lista lo que sí está cubierto, bullet a bullet]
+- [ 1. Listado de libros disponibles (Paginación)
+    2. Gestión de libros (CRUD)
+    3. Manejo de solicitudes de libros disponibles
+    4. Manejo de solciitudes de libros no disponibles
+    5. Control de limite de libros por estudiante
+    6. Notificaciones para fecha de vencimiento del prestamo de libro
+    7. Historial de prestamo y devolución de libros
+    8. Control de multas por entrega de libro fuera del la fecha de regreso
+  ]
 
 **Explícitamente fuera del alcance:**
 
-- [Lista lo que el correo menciona pero NO se va a implementar. Por ejemplo: el caso de los profesores investigadores.]
+- [ 1. El manejo del prestamo a estudiantes de postgrado
+    2. El manejo del prestado a profesores investigadores
+  ]
 
 ---
 
@@ -32,23 +42,67 @@
 ### Entidad: Libro
 
 | Campo     | Tipo     | Obligatorio | Descripción   |
-| `[campo]` | `[tipo]` | sí/no       | [descripción] |
+| `[id]` | `[int]` | sí      | [Identificador único del libro] |
+| `[name]` | `[string]` | sí      | [Nombre del libro] |
+| `[author]` | `[string]` | sí      | [Autor del libro] |
+| `[location]` | `[int]` | no      | [Relación con la sala] |
+
 
 ### Entidad: Ejemplar
 
 [Repite la tabla. Cada libro puede tener varios ejemplares. Decide tú la estructura.]
 
+| Campo     | Tipo     | Obligatorio | Descripción   |
+| `[id]` | `[int]` | sí      | [Identificador único del ejemplar] |
+| `[code]` | `[string]` | sí      | [Código de barras] |
+| `[state]` | `[string]` | sí      | [Estado del libro] |
+| `[loan_date]` | `[date]` | no      | [Fecha del prestamo] |
+| `[id_libro]` | `[int]` | no      | [Relación con el libro] |
+
 ### Entidad: Estudiante
 
 [Tabla de campos]
+
+| Campo     | Tipo     | Obligatorio | Descripción   |
+| `[id]` | `[int]` | sí      | [Identificador único del estudiante] |
+| `[code]` | `[string]` | sí      | [Código del estudiante] |
+| `[name]` | `[string]` | sí      | [Nombre del estudiante] |
+| `[id_program]` | `[int]` | sí      | [Relación con el progama] |
+
+### Entidad: Programa
+
+[Tabla de campos]
+
+| Campo     | Tipo     | Obligatorio | Descripción   |
+| `[id]` | `[int]` | sí      | [Identificador único del programa] |
+| `[code]` | `[string]` | sí      | [Código del programa] |
+| `[name]` | `[string]` | sí      | [Nombre del programa] |
+
 
 ### Entidad: Préstamo
 
 [Tabla de campos. Aquí va estudiante_id, ejemplar_id, fecha_prestamo, fecha_devolucion_esperada, fecha_devolucion_real, estado, etc.]
 
+| Campo     | Tipo     | Obligatorio | Descripción   |
+| `[id]` | `[int]` | sí      | [Identificador único del prestamo] |
+| `[code]` | `[string]` | sí      | [Código del prestamo] |
+| `[state]` | `[string]` | sí      | [Estado del prestamo] |
+| `[loan_date]` | `[date]` | sí      | [Fecha del prestamo] |
+| `[expected_return_date]` | `[date]` | sí      | [Fecha de devolución esperada] |
+| `[actual_return_date]` | `[date]` | sí      | [Fecha de devolución real] |
+| `[id_student]` | `[int]` | sí      | [Relación con el estudiante] |
+| `[copy_id]` | `[int]` | sí      | [Relación con el ejemplar] |
+
 ### Entidad: Multa
 
 [Tabla de campos]
+
+| Campo     | Tipo     | Obligatorio | Descripción   |
+| `[id]` | `[int]` | sí      | [Identificador único de la multa] |
+| `[code]` | `[string]` | sí      | [Código de la multa] |
+| `[amount]` | `[string]` | sí      | [Cantidad de multa] |
+| `[id_student]` | `[int]` | sí      | [Relación con el estudiante] |
+| `[id_loan]` | `[int]` | sí      | [Relación con el prestamo] |
 
 ### Diagrama de relaciones
 
@@ -59,6 +113,7 @@ Libro 1 --- N Ejemplar
 Estudiante 1 --- N Prestamo
 Ejemplar 1 --- N Prestamo (a lo largo del tiempo)
 Prestamo 0..1 --- 1 Multa
+Programa 1 --- N Estudiante
 ]
 ```
 
@@ -143,12 +198,13 @@ Prestamo 0..1 --- 1 Multa
 | 409 | Conflict | Reglas de negocio violadas (límite alcanzado, duplicado, etc.) |
 | 500 | Internal Server Error | Error no controlado del servidor |
 
+[Si usas otros, agrégalos.]
 
 ---
 
 ## 8. Restricciones técnicas
 
-- **Stack:** [Node.js + Express / Python + FastAPI / etc.]
+- **Stack:** [Node.js + Express]
 - **Persistencia:** datos en memoria. No usar base de datos.
 - **TypeScript** (según tu stack).
 - **Sin autenticación** en esta versión.
