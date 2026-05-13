@@ -275,9 +275,18 @@ Nota: Los endpoints administrativos (`POST /libros`, `POST /ejemplares`) son opc
 ---
 
 ## 8. Restricciones técnicas
-
 - **Stack:** [Node.js + Express]
 - **Persistencia:** datos en memoria. No usar base de datos.
 - **TypeScript** (según tu stack).
 - **Sin autenticación** en esta versión.
 - **Sin frontend** en esta versión. Solo API REST.
+- 
+- **Arquitectura de Software:** Implementación obligatoria de Arquitectura Hexagonal (Ports and Adapters) y Arquitectura Limpia (Clean Architecture).
+- **Principios de Diseño:** El código debe adherirse estrictamente a los principios SOLID y al principio KISS (Keep It Simple, Stupid), garantizando código modular, mantenible y sin sobreingeniería.
+- **Separación de Responsabilidades:** El código debe estar desacoplado en capas claras:
+  - `infrastructure/` (routes, controllers): Adaptadores de entrada para manejar peticiones HTTP y respuestas.
+  - `application/` (services o use cases): Lógica de orquestación y validación de las reglas de negocio (RN1 a RN8).
+  - `domain/`: Modelos, entidades y reglas puras.
+  - `infrastructure/repositories/`: Adaptadores de salida para el manejo de los datos en memoria.
+- **Inyección de Dependencias:** Obligatorio inyectar los repositorios (puertos) en los servicios para garantizar el desacoplamiento.
+- **Manejo de Errores:** Centralizado a través de un middleware de Express en la capa de infraestructura.
