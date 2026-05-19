@@ -146,4 +146,10 @@ dist
 # SvelteKit build / generate output
 .svelte-kit
 
+# SQLite database
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+
 # End of https://www.toptal.com/developers/gitignore/api/nodenode_modules/

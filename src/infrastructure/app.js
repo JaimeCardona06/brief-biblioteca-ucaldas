@@ -1,4 +1,5 @@
 const express = require('express');
+const { getDatabase } = require('./database');
 
 // Repositories
 const BookRepository = require('./repositories/BookRepository');
@@ -29,13 +30,16 @@ function createApp() {
   const app = express();
   app.use(express.json());
 
-  // Instantiate repositories
-  const bookRepo = new BookRepository();
-  const copyRepo = new CopyRepository();
-  const studentRepo = new StudentRepository();
-  const loanRepo = new LoanRepository();
-  const fineRepo = new FineRepository();
-  const solicitudRepo = new SolicitudRepository();
+  // Initialize SQLite database
+  const db = getDatabase();
+
+  // Instantiate repositories with SQLite
+  const bookRepo = new BookRepository({ db });
+  const copyRepo = new CopyRepository({ db });
+  const studentRepo = new StudentRepository({ db });
+  const loanRepo = new LoanRepository({ db });
+  const fineRepo = new FineRepository({ db });
+  const solicitudRepo = new SolicitudRepository({ db });
 
   // Instantiate services with DI
   const bookService = new BookService({ bookRepo, copyRepo });

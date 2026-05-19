@@ -1,7 +1,8 @@
 // Bootstrap the application (Clean Architecture / Hexagonal)
+require('dotenv').config();
 const createApp = require('./src/infrastructure/app');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 const app = createApp();
 
 app.listen(PORT, () => {
