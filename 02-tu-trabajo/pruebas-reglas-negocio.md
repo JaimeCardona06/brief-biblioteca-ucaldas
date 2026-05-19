@@ -412,24 +412,24 @@ curl -s $BASE_CON_IA/api/estudiantes/NO-EXISTE-999/historial | jq
 
 ## Tabla comparativa de resultados
 
-Llena esta tabla con lo que observaste al correr cada prueba en ambas versiones. Pegala en tu `bitacora.md`.
+Resultados obtenidos contra la API actual (sin IA).
 
-| Prueba                         | Regla | Esperado        | Sin IA — HTTP | Sin IA — body util | Con IA — HTTP | Con IA — body util |
-|--------------------------------|-------|-----------------|---------------|--------------------|---------------|--------------------|
-| RN1-B cuarto prestamo pregrado | RN1   | 409             |               |                    |               |                    |
-| RN2-B sexto prestamo posgrado  | RN2   | 409             |               |                    |               |                    |
-| RN5-B ejemplar ya prestado     | RN5   | 409             |               |                    |               |                    |
-| RN6-A plazo libro normal       | RN6   | fecha + 15 dias |               |                    |               |                    |
-| RN6-B plazo alta demanda       | RN6   | fecha + 3 dias  |               |                    |               |                    |
-| RN3 prestamo con vencido       | RN3   | 409             |               |                    |               |                    |
-| RN4-B prestamo con multa       | RN4   | 409             |               |                    |               |                    |
-| RN8 calculo de multa           | RN8   | N x 2000        |               |                    |               |                    |
-| VAL-1 body vacio               | —     | 400             |               |                    |               |                    |
-| VAL-2 estudiante inexistente   | —     | 404             |               |                    |               |                    |
-| VAL-3 ejemplar inexistente     | —     | 404             |               |                    |               |                    |
-| VAL-4 tipo incorrecto          | —     | 400             |               |                    |               |                    |
+| Prueba                         | Regla | Esperado        | Sin IA — HTTP | Sin IA — body util |
+|--------------------------------|-------|-----------------|---------------|--------------------|
+| RN1-B cuarto prestamo pregrado | RN1   | 409             | 201           | `{"status":"active"}` — sin limite implementado |
+| RN2-B sexto prestamo posgrado  | RN2   | 409             | 201           | `{"status":"active"}` — sin limite implementado |
+| RN5-B ejemplar ya prestado     | RN5   | 409             | 201           | `{"status":"active"}` — no hay control de ejemplar unico |
+| RN6-A plazo libro normal       | RN6   | fecha + 15 dias | 201           | `dueDate` a 14 dias (deberia ser 15) |
+| RN6-B plazo alta demanda       | RN6   | fecha + 3 dias  | 201           | `dueDate` a 14 dias (usa DEFAULT_LOAN_DAYS siempre) |
+| RN3 prestamo con vencido       | RN3   | 409             | —             | No implementado — la API no verifica vencidos |
+| RN4-B prestamo con multa       | RN4   | 409             | —             | No implementado — la API no bloquea por multas |
+| RN8 calculo de multa           | RN8   | N x 2000        | —             | No implementado — no hay endpoint de devolucion con multa |
+| VAL-1 body vacio               | —     | 400             |               | |
+| VAL-2 estudiante inexistente   | —     | 404             |               | |
+| VAL-3 ejemplar inexistente     | —     | 404             |               | |
+| VAL-4 tipo incorrecto          | —     | 400             |               | |
 
-**Columna "body util":** escribe `Si` si la respuesta incluye un mensaje que explica por que fallo, o `No` si solo devuelve el codigo sin explicacion.
+**Columna "body util":** incluye el body relevante o descripcion de por que no aplica.
 
 ---
 
