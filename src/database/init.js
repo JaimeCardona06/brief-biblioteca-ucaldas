@@ -5,12 +5,11 @@ function initDatabase() {
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS books (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      author TEXT,
-      isbn TEXT,
-      copies INTEGER DEFAULT 1,
-      createdAt TEXT DEFAULT (datetime('now'))
+      id TEXT PRIMARY KEY,
+      titulo TEXT NOT NULL,
+      autor TEXT,
+      sala TEXT,
+      altaDemanda INTEGER DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS students (
@@ -22,7 +21,7 @@ function initDatabase() {
 
     CREATE TABLE IF NOT EXISTS loans (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      bookId INTEGER NOT NULL REFERENCES books(id),
+      bookId TEXT NOT NULL REFERENCES books(id),
       studentId INTEGER NOT NULL REFERENCES students(id),
       loanDate TEXT NOT NULL,
       dueDate TEXT NOT NULL,

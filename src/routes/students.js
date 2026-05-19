@@ -17,13 +17,13 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
   const student = studentRepo.findById(req.params.id);
-  if (!student) return res.status(404).json({ error: 'student not found' });
+  if (!student) return res.status(404).json({ error: 'estudiante no encontrado' });
   res.json(student);
 });
 
 router.put('/:id', (req, res) => {
   const student = studentRepo.findById(req.params.id);
-  if (!student) return res.status(404).json({ error: 'student not found' });
+  if (!student) return res.status(404).json({ error: 'estudiante no encontrado' });
   const updated = studentRepo.update(Number(req.params.id), req.body);
   res.json(updated);
 });
@@ -31,24 +31,24 @@ router.put('/:id', (req, res) => {
 router.delete('/:id', (req, res) => {
   const id = Number(req.params.id);
   const student = studentRepo.findById(id);
-  if (!student) return res.status(404).json({ error: 'student not found' });
+  if (!student) return res.status(404).json({ error: 'estudiante no encontrado' });
   if (loanRepo.hasActiveLoansByStudent(id)) {
-    return res.status(400).json({ error: 'cannot delete student with active loans' });
+    return res.status(400).json({ error: 'no se puede eliminar un estudiante con préstamos activos' });
   }
   studentRepo.remove(id);
-  res.json({ message: 'student removed' });
+  res.json({ message: 'estudiante eliminado' });
 });
 
-router.get('/:id/fines', (req, res) => {
+router.get('/:id/multas', (req, res) => {
   const student = studentRepo.findById(req.params.id);
-  if (!student) return res.status(404).json({ error: 'student not found' });
+  if (!student) return res.status(404).json({ error: 'estudiante no encontrado' });
   const fines = loanRepo.getFinesByStudent(student.id);
   res.json({ studentId: student.id, ...fines });
 });
 
-router.get('/:id/loans', (req, res) => {
+router.get('/:id/prestamos', (req, res) => {
   const student = studentRepo.findById(req.params.id);
-  if (!student) return res.status(404).json({ error: 'student not found' });
+  if (!student) return res.status(404).json({ error: 'estudiante no encontrado' });
   res.json(loanRepo.getLoansByStudent(student.id));
 });
 

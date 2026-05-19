@@ -13,13 +13,13 @@ initDatabase();
 
 app.get('/', (req, res) => {
   res.json({
-    message: 'API Biblioteca - usa /books, /students, /loans. SQLite persistente.'
+    message: 'API Biblioteca - usa /api/libros, /api/estudiantes, /api/prestamos. SQLite persistente.'
   });
 });
 
-app.use('/books', booksRouter);
-app.use('/students', studentsRouter);
-app.use('/loans', loansRouter);
+app.use('/api/libros', booksRouter);
+app.use('/api/estudiantes', studentsRouter);
+app.use('/api/prestamos', loansRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'not found' });

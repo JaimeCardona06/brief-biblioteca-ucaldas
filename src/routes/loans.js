@@ -11,15 +11,13 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 router.post('/', (req, res) => {
   const { bookId, studentId, loanDays } = req.body;
-  if (!bookId || !studentId) return res.status(400).json({ error: 'bookId and studentId are required' });
+  if (!bookId || !studentId) return res.status(400).json({ error: 'bookId y studentId son requeridos' });
 
   const book = bookRepo.findById(bookId);
-  if (!book) return res.status(404).json({ error: 'book not found' });
+  if (!book) return res.status(404).json({ error: 'libro no encontrado' });
 
   const student = studentRepo.findById(studentId);
-  if (!student) return res.status(404).json({ error: 'student not found' });
-
-  if (bookRepo.copyCount(bookId) < 1) return res.status(400).json({ error: 'no copies available' });
+  if (!student) return res.status(404).json({ error: 'estudiante no encontrado' });
 
   const now = new Date();
   const days = (Number.isInteger(loanDays) && loanDays > 0) ? loanDays : DEFAULT_LOAN_DAYS;
@@ -32,8 +30,6 @@ router.post('/', (req, res) => {
     dueDate: due.toISOString()
   });
 
-  bookRepo.decrementCopies(book.id);
-
   res.status(201).json(loan);
 });
 
@@ -44,14 +40,14 @@ router.get('/', (req, res) => {
 
 router.get('/:id', (req, res) => {
   const loan = loanRepo.findById(req.params.id);
-  if (!loan) return res.status(404).json({ error: 'loan not found' });
+  if (!loan) return res.status(404).json({ error: 'préstamo no encontrado' });
   res.json(loan);
 });
 
-router.post('/:id/return', (req, res) => {
+router.post('/:id/devolver', (req, res) => {
   const loan = loanRepo.findById(req.params.id);
-  if (!loan) return res.status(404).json({ error: 'loan not found' });
-  if (loan.status !== 'active') return res.status(400).json({ error: 'loan already returned' });
+  if (!loan) return res.status(404).json({ error: 'préstamo no encontrado' });
+  if (loan.status !== 'active') return res.status(400).json({ error: 'el préstamo ya fue devuelto' });
 
   const now = new Date();
   const due = new Date(loan.dueDate);
@@ -61,9 +57,7 @@ router.post('/:id/return', (req, res) => {
 
   const updated = loanRepo.returnLoan(loan.id, now.toISOString(), fine);
 
-  bookRepo.incrementCopies(loan.bookId);
-
-  res.json({ loan: updated, fine });
+  res.json({ loan: updated, multa: fine });
 });
 
 module.exports = router;
