@@ -3,6 +3,11 @@
 .opencode/
 openspec/
 
+# Base de datos SQLite local
+database/*.db
+database/*.db-wal
+database/*.db-shm
+
 # Created by https://www.toptal.com/developers/gitignore/api/node
 # Edit at https://www.toptal.com/developers/gitignore?templates=node
 
