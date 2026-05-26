@@ -293,3 +293,86 @@ if (typeof student_id !== 'string' || typeof copy_id !== 'string') {
 | Calidad de código | ✅ Curls correctos | ⚠️ Variable |
 | Sin enviar código a externos | ❌ | ✅ |
 | Sin consumo de recursos locales | ✅ | ❌ RAM ~4-8 GB |
+
+---
+
+## Sesión 6 — Pruebas en lenguaje natural (RN3, RN4, RN7, RN8)
+
+**Modelo:** deepseek-v4-flash (OpenCode API)  
+**Servidor API:** http://localhost:3001  
+**Fecha:** 2026-05-26
+
+---
+
+### 😅 RN3: "Profe, se me pasó la fecha de devolución del libro"
+
+**Historia:** Laura (EST-PRE-03) pidió un libro en abril, se le venció el plazo y nunca lo devolvió. Ahora quiere sacar otro libro.
+
+**Lo que pasó:**
+1. Laura ya tiene un préstamo vencido desde el 16 de abril (préstamo ID 11, sigue en `estado: "activo"`)
+2. Intentó sacar un nuevo libro con un ejemplar disponible (EJ-005-03)
+3. ❌ **El sistema NO lo bloqueó** — el préstamo se creó (ID 16)
+
+**¿Por qué?** El sistema no marca automáticamente los préstamos vencidos. La fecha venció hace 40 días pero el estado sigue siendo `"activo"`. Para que RN3 funcione, alguien tendría que haber marcado manualmente el préstamo como `"vencido"`.
+
+**Hallazgo crítico:** ⚠️ No hay un mecanismo (cron job, scheduler, o verificación al crear préstamo) que detecte préstamos con `fecha_devolucion_esperada < hoy` y los marque como vencidos.
+
+---
+
+### 😤 RN4: "Tengo una multa sin pagar, ¿me dejan sacar libro?"
+
+**Historia:** Sofía (EST-PRE-05) devolvió un libro 11 días tarde y le generaron una multa de $22,000. Aún no la ha pagado y quiere otro libro.
+
+**Lo que pasó:**
+1. ✅ Se generó multa de **$22,000** por 11 días de retraso × $2,000/día
+2. ✅ Al intentar un nuevo préstamo → **409 "bloqueado_por_multas_o_vencidos"**
+
+**Conclusión:** El bloqueo por multas funciona correctamente.
+
+---
+
+### 💸 RN8: "¿Cuánto me toca pagar por devolver tarde?"
+
+**Historia:** Sofía sacó un libro el 1 de mayo (debía devolverlo el 16 de mayo) pero lo devolvió el 26 de mayo.
+
+**Lo que pasó:**
+| Días de retraso | Tarifa diaria | Multa calculada |
+|-----------------|---------------|-----------------|
+| 11 | $2,000 | **$22,000** ✅ |
+
+**Conclusión:** La regla RN8 se aplica correctamente. La multa queda registrada en la BD con `pagada: false`.
+
+---
+
+### 🔄 RN7: "Quiero renovar pero ya alguien más lo pidió"
+
+**Historia:** El préstamo ID 1 (libro LIB-001) tiene una solicitud activa de otro estudiante.
+
+**Lo que pasó:**
+| Acción | Resultado |
+|--------|-----------|
+| Intentar renovar préstamo 1 (con solicitud activa) | ❌ **409 "renovacion_no_permitida"** |
+| Intentar renovar préstamo 13 (ya renovado 1 vez) | ❌ **409 "renovacion_no_permitida"** (máx 1 renovación) |
+
+**Conclusión:** La renovación se deniega tanto si hay solicitudes activas como si ya se alcanzó el máximo de renovaciones.
+
+---
+
+### 📊 Resultados generales
+
+| Regla | Escenario | Esperado | Real | Estado |
+|-------|-----------|----------|------|--------|
+| RN3 | Préstamo vencido (no marcado) | 409 | 201 | ❌ **FALLA** |
+| RN4 | Multa pendiente de pago | 409 | 409 ✅ | ✅ **PASA** |
+| RN7 | Renovar con solicitud activa | 409 | 409 ✅ | ✅ **PASA** |
+| RN7 | Máximo de renovaciones (1) | 409 | 409 ✅ | ✅ **PASA** |
+| RN8 | Cálculo de multa (11 días × $2,000) | $22,000 | $22,000 ✅ | ✅ **PASA** |
+| RN8 | Multa registrada en BD | Sí | ✅ `pagada: false` | ✅ **PASA** |
+
+### 🐛 Bugs encontrados
+
+| Bug | Archivo | Línea | Severidad |
+|-----|---------|-------|-----------|
+| VAL-5: Tipo incorrecto da 404 en vez de 400 | `loanController.js` | 8-9 | Media |
+| **RN3: No se detectan vencidos automáticamente** | `LoanService.js` | 26 | **Alta** |
+| No hay scheduler que marque préstamos como `vencido` | — | — | Alta |
