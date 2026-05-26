@@ -49,12 +49,12 @@ function createApp() {
   const solicitudService = new SolicitudService({ solicitudRepo, bookRepo, studentRepo });
 
   // Wire routes
-  app.use('/libros', makeBookController({ bookService, copyRepo }));
-  app.use('/ejemplares', makeCopyController({ copyService }));
-  app.use('/estudiantes', makeStudentController({ studentService }));
-  app.use('/prestamos', makeLoanController({ loanService }));
-  app.use('/devoluciones', makeReturnController({ loanService }));
-  app.use('/solicitudes', makeSolicitudController({ solicitudService, solicitudRepo }));
+  app.use('/api/libros', makeBookController({ bookService, copyRepo }));
+  app.use('/api/ejemplares', makeCopyController({ copyService }));
+  app.use('/api/estudiantes', makeStudentController({ studentService }));
+  app.use('/api/prestamos', makeLoanController({ loanService }));
+  app.use('/api/devoluciones', makeReturnController({ loanService }));
+  app.use('/api/solicitudes', makeSolicitudController({ solicitudService, solicitudRepo }));
 
   // 404
   app.use((req, res) => {
