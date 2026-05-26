@@ -71,7 +71,9 @@
 
 ---
 
-## Sección 2 — RN1: Límite de préstamos (pregrado)
+## Sesión 2 — Pruebas RN1 y RN2
+
+### RN1 — Límite de préstamos (pregrado)
 
 **Objetivo:** Verificar que un estudiante de pregrado (EST-PRE-01) no pueda tener más de 3 préstamos activos.
 
@@ -118,7 +120,7 @@
 
 ---
 
-## Sección 3 — RN2: Límite de préstamos (posgrado)
+### RN2 — Límite de préstamos (posgrado)
 
 **Objetivo:** Verificar que un estudiante de posgrado (EST-POS-01) no pueda tener más de 5 préstamos activos.
 
