@@ -412,24 +412,24 @@ curl -s $BASE_CON_IA/api/estudiantes/NO-EXISTE-999/historial | jq
 
 ## Tabla comparativa de resultados
 
-Resultados obtenidos contra la API actual (sin IA).
+Resultados obtenidos contra ambas versiones del proyecto. La columna **Sin IA** corresponde a la rama `FIAT-proyecto-v1` y **Con IA** a `FIAT-proyecto-v2`.
 
-| Prueba                         | Regla | Esperado        | Sin IA — HTTP | Sin IA — body util |
-|--------------------------------|-------|-----------------|---------------|--------------------|
-| RN1-B cuarto prestamo pregrado | RN1   | 409             | 201           | `{"status":"active"}` — sin limite implementado |
-| RN2-B sexto prestamo posgrado  | RN2   | 409             | 201           | `{"status":"active"}` — sin limite implementado |
-| RN5-B ejemplar ya prestado     | RN5   | 409             | 201           | `{"status":"active"}` — no hay control de ejemplar unico |
-| RN6-A plazo libro normal       | RN6   | fecha + 15 dias | 201           | `dueDate` a 14 dias (deberia ser 15) |
-| RN6-B plazo alta demanda       | RN6   | fecha + 3 dias  | 201           | `dueDate` a 14 dias (usa DEFAULT_LOAN_DAYS siempre) |
-| RN3 prestamo con vencido       | RN3   | 409             | —             | No implementado — la API no verifica vencidos |
-| RN4-B prestamo con multa       | RN4   | 409             | —             | No implementado — la API no bloquea por multas |
-| RN8 calculo de multa           | RN8   | N x 2000        | —             | No implementado — no hay endpoint de devolucion con multa |
-| VAL-1 body vacio               | —     | 400             |               | |
-| VAL-2 estudiante inexistente   | —     | 404             |               | |
-| VAL-3 ejemplar inexistente     | —     | 404             |               | |
-| VAL-4 tipo incorrecto          | —     | 400             |               | |
+| Prueba                         | Regla | Esperado        | Sin IA — HTTP | Sin IA — body util | Con IA — HTTP | Con IA — body util |
+|--------------------------------|-------|-----------------|---------------|--------------------|---------------|--------------------|
+| RN1-B cuarto prestamo pregrado | RN1   | 409             | 201           | `{"status":"active"}` — sin limite implementado | 409 | Si — `"limite_prestamos_alcanzado"` |
+| RN2-B sexto prestamo posgrado  | RN2   | 409             | 201           | `{"status":"active"}` — sin limite implementado | 409 | Si — `"limite_prestamos_alcanzado"` |
+| RN5-B ejemplar ya prestado     | RN5   | 409             | 201           | `{"status":"active"}` — no hay control de ejemplar unico | 409 | Si — `"ejemplar_no_disponible"` |
+| RN6-A plazo libro normal       | RN6   | fecha + 15 dias | 201           | `dueDate` a 14 dias (deberia ser 15) | 2026-06-03 (+15d) | Si — fecha correcta |
+| RN6-B plazo alta demanda       | RN6   | fecha + 3 dias  | 201           | `dueDate` a 14 dias (usa DEFAULT_LOAN_DAYS siempre) | 2026-05-22 (+3d) | Si — fecha correcta |
+| RN3 prestamo con vencido       | RN3   | 409             | —             | No implementado — la API no verifica vencidos | 409 | Si — `"bloqueado_por_multas_o_vencidos"` |
+| RN4-B prestamo con multa       | RN4   | 409             | —             | No implementado — la API no bloquea por multas | 409 | Si — `"bloqueado_por_multas_o_vencidos"` |
+| RN8 calculo de multa           | RN8   | N x 2000        | —             | No implementado — no hay endpoint de devolucion con multa | 488d × 2000 = 976,000 | Si — monto calculado |
+| VAL-1 body vacio               | —     | 400             |               | | 400 | Si — `"student_id and copy_id required"` |
+| VAL-2 estudiante inexistente   | —     | 404             |               | | 404 | Si — `"student not found"` |
+| VAL-3 ejemplar inexistente     | —     | 404             |               | | 404 | Si — `"copy not found"` |
+| VAL-4 tipo incorrecto          | —     | 400             |               | | 404 | No — busca estudiante con ID 12345 (inexistente) sin validar tipo primero |
 
-**Columna "body util":** incluye el body relevante o descripcion de por que no aplica.
+**Columna "body util":** para Sin IA incluye el body relevante o descripcion de por que no aplica. Para Con IA indica `Si` si la respuesta incluye un mensaje que explica por que fallo, o `No` si solo devuelve el codigo sin explicacion.
 
 ---
 
